@@ -1,0 +1,68 @@
+## ATM digital twin, will display status, cash, temp, and paper amount
+class ATM: 
+    def __init__(self, location, cash=5000):
+        self.location = location
+        self.status = "OFF"        
+        self.cash_balance = cash     
+        self.temperature = 22.0      
+        self.paper_level = 100       
+ 
+    def start(self):
+        if self.status == "ERROR":
+            print("Cannot start: fix the error first (try cool_down()).")
+        else:
+            self.status = "ONLINE"
+            self.temperature += 3   
+            print(f"ATM at {self.location} is now ONLINE.")
+ 
+    def stop(self):
+        self.status = "OFF"
+        self.temperature = 22.0
+        print("ATM shut down.")
+ 
+    def withdraw(self, amount):
+        if self.status != "ONLINE":
+            print("Withdrawal failed: ATM is not online.")
+        elif amount > self.cash_balance:
+            print(f"Withdrawal of ${amount} declined: not enough cash in machine.")
+        elif self.paper_level < 5:
+            print("Withdrawal failed: out of receipt paper.")
+        else:
+            self.cash_balance -= amount
+            self.paper_level -= 10  
+            self.temperature += 6    
+            print(f"Dispensed ${amount}.")
+            if self.temperature > 40:
+                self.status = "ERROR"
+                print("WARNING: Overheating! ATM has gone into ERROR state.")
+ 
+    def cool_down(self):
+        self.temperature = max(22.0, self.temperature - 15)
+        if self.status == "ERROR" and self.temperature <= 40:
+            self.status = "OFF"
+            print("Cooled down. Error cleared; ATM is OFF, ready to restart.")
+        else:
+            print(f"Cooling... temperature is now {self.temperature}°C.")
+ 
+    def refill(self, cash=0, paper=0):
+        self.cash_balance += cash
+        self.paper_level = min(100, self.paper_level + paper)
+        print(f"Refilled: +${cash} cash, +{paper}% paper.")
+ 
+    def display_status(self):
+        print("--- ATM STATUS ---")
+        print(f"Location    : {self.location}")
+        print(f"Status      : {self.status}")
+        print(f"Cash        : ${self.cash_balance}")
+        print(f"Temperature : {self.temperature}°C")
+        print(f"Paper       : {self.paper_level}%")
+        if self.cash_balance < 1000:
+            print("Alert       : LOW CASH")
+        print("------------------\n")
+
+my_atm = ATM("Main Street")
+
+my_atm.display_status()
+my_atm.start()
+my_atm.withdraw(100)
+my_atm.display_status()
